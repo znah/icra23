@@ -253,8 +253,8 @@ The Demo is powered by <a href="https://google.github.io/swissgl/">SwissGL</a>
             vec3 pos = points(ivec3(ID.xy,0)).xyz*1.0;
             vec3 state = points(ivec3(ID.xy,1)).xyz;
             color = state*0.3+0.7;
-            VOut.xy = pos.xy;//wld2view(vec4(pos,1));
-            VOut.xy += XY*0.15;
+            VOut.xy = pos.xy; //wld2view(vec4(pos,1));
+            VOut.xy += XY*0.2;
             VOut.xyz /= viewR;`,FP:`
             FOut = vec4(color, smoothstep(1.0, 0.6, length(XY))*0.9);`})
         }
