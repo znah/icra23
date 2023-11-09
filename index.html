@@ -180,8 +180,8 @@ The Demo is powered by <a href="https://google.github.io/swissgl/">SwissGL</a>
             for (let i=0; i<this.uni.stepN; ++i) {
             this.seed = Math.random()*123457;
             glsl({W, touchPos, seed:this.seed, ...uni, Inc, FP:`
-                FOut  = Src(ivec3(I,0));
-                FOut1 = Src(ivec3(I,1));
+                FOut  = Src(I,0);
+                FOut1 = Src(I,1);
                 if (I.y*ViewSize.x+I.x > pointN) {
                     FOut1 = vec4(1.0);
                     return;
@@ -197,12 +197,12 @@ The Demo is powered by <a href="https://google.github.io/swissgl/">SwissGL</a>
                     vec3 rnd=vec3(0);
                     if (!tryMessage(ivec2(x,y), I, rnd)) continue;
                     count += 1.0;
-                    vec4 pos1 = Src(ivec3(x,y,0));
+                    vec4 pos1 = Src(ivec2(x,y),0);
                     vec3 dp = (pos-pos1.xyz)/distScale;
                     dp *= 1.0 + (rnd.x-0.5)*distNoise;
                     dp.xy *= rot2((rnd.y-0.5)*radians(angleNoise));
                     float r = length(dp)+1e-5;
-                    vec4 msg = vec4(state - Src(ivec3(vec2(x,y),1)).xyz + r, 1.0), upd=vec4(0);
+                    vec4 msg = vec4(state - Src(ivec2(x,y),1).xyz + r, 1.0), upd=vec4(0);
                     for (int i=0; i<W.length(); i+=2) {upd += sin(dot(msg, W[i]))*W[i+1];}
                     dstate += upd.xyz;
                     dpos += dp/r*upd.w;
@@ -229,16 +229,16 @@ The Demo is powered by <a href="https://google.github.io/swissgl/">SwissGL</a>
                 const links = glsl({Aspect:'fit', ...uni, seed:this.seed,
                 points:points[0], Grid:[w*h, w*h], 
                 Clear:0, Blend:'s+d', Inc, VP:`
-                VOut = vec4(-1000,0,0,1);
+                VPos = vec4(-1000,0,0,1);
                 if (ID.x >= pointN || ID.y >= pointN) return;
                 int W = points_size().x;
                 ivec2 i1=ivec2(ID.x%W, ID.x/W), i2=ivec2(ID.y%W, ID.y/W);
                 vec3 rnd;
                 if (!tryMessage(i1, i2, rnd)) return;
 
-                vec2 p1=points(ivec3(i1, 0)).xy, p2=points(ivec3(i2, 0)).xy;
+                vec2 p1=points(i1, 0).xy, p2=points(i2, 0).xy;
                 vec2 u=normalize(p1-p2), v=vec2(-u.y, u.x);
-                VOut.xy = (mix(p1, p2, UV.x)+v*XY.y*0.02)/viewR;
+                VPos.xy = (mix(p1, p2, UV.x)+v*XY.y*0.02)/viewR;
                 `, FP:`1`}, {format:'r16f', tag:'links'});
 
                 glsl({links, ...uni, FP:'linkAlpha*linkAlpha*sqrt(links(UV).x*vec3(0.1, 0.01, 0.001)),1'});
@@ -247,15 +247,15 @@ The Demo is powered by <a href="https://google.github.io/swissgl/">SwissGL</a>
             glsl({points: points[0], Grid:points[0].size, ...uni, ...params,
             Aspect:'fit', Blend:'d*(1-sa)+s*sa', Inc:'varying vec3 color;', VP:`
             if (ID.y*Grid.x+ID.x >= int(pointN)) {
-                VOut = vec4(-1000,0,0,1);
+                VPos = vec4(-1000,0,0,1);
                 return;
             }
-            vec3 pos = points(ivec3(ID.xy,0)).xyz*1.0;
-            vec3 state = points(ivec3(ID.xy,1)).xyz;
+            vec3 pos = points(ID.xy,0).xyz*1.0;
+            vec3 state = points(ID.xy,1).xyz;
             color = state*0.3+0.7;
-            VOut.xy = pos.xy; //wld2view(vec4(pos,1));
-            VOut.xy += XY*0.2;
-            VOut.xyz /= viewR;`,FP:`
+            VPos.xy = pos.xy;
+            VPos.xy += XY*0.2;
+            VPos.xyz /= viewR;`,FP:`
             FOut = vec4(color, smoothstep(1.0, 0.6, length(XY))*0.9);`})
         }
     }
